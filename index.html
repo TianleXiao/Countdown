@@ -6,131 +6,174 @@
     <title>Milestone Countdown</title>
     
     <link rel="icon" href="assets/Countdown Logo.ico" type="image/x-icon">
-    
+
     <style>
+        /* 极致暗黑与现代排版重置 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            background-color: #050505;
-            color: #e0e0e0;
+            background-color: #030303;
+            color: #737373; /* 次要文字采用暗灰 */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 70%);
+            overflow: hidden;
+            position: relative;
         }
 
+        /* 背景动态微光深渊感 */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0) 70%);
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        /* 主容器：引入动态流光边框与毛玻璃 */
         .countdown-container {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 40px;
+            position: relative;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 24px;
+            padding: 50px 40px;
             width: 90%;
-            max-width: 550px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            max-width: 500px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+            z-index: 1;
+            overflow: hidden;
         }
 
+        /* 细微的容器动态边框线 */
+        .countdown-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.05) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* 顶部标题：极其克制的奢华感 */
         .header-title {
             text-align: center;
-            font-size: 1.2rem;
-            font-weight: 300;
-            letter-spacing: 4px;
-            margin-bottom: 35px;
-            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 7px;
+            margin-bottom: 45px;
+            color: #8a8a8a;
             text-transform: uppercase;
         }
 
+        /* 每个事件项的骨架 */
         .event-item {
-            margin-bottom: 25px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 40px;
+            position: relative;
         }
 
         .event-item:last-child {
             margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
         }
 
+        /* 事件头部信息 */
         .event-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
+            align-items: baseline;
+            margin-bottom: 16px;
+            padding-left: 4px;
         }
 
         .event-name {
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 1.05rem;
+            font-weight: 400;
             color: #ffffff;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .target-date {
-            font-size: 0.8rem;
-            color: #666;
-            font-family: monospace;
+            font-size: 0.75rem;
+            color: #404040;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
         }
 
+        /* 倒计时网格：去除了原先的突兀方块，改用悬浮悬停过渡 */
         .time-display {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            gap: 16px;
         }
 
         .time-box {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 12px 5px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 16px 0;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* 交互动态：鼠标滑过时的高级内敛微光 */
         .time-box:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            background: rgba(25, 25, 25, 0.8);
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-4px);
         }
 
+        /* 数字部分：使用等宽字体防止动态跳动，高亮纯白 */
         .time-value {
-            font-size: 1.4rem;
-            font-weight: 600;
+            font-size: 1.6rem;
+            font-weight: 300;
             color: #ffffff;
-            font-family: monospace;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
             margin-bottom: 4px;
+            transition: opacity 0.3s ease;
         }
 
+        /* 标签：小字重、高字距 */
         .time-label {
-            font-size: 0.65rem;
-            color: #888;
+            font-size: 0.55rem;
+            color: #525252;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
+            font-weight: 500;
         }
         
+        /* 结束状态的优雅沉淀 */
         .completed {
-            color: #555;
-            font-style: italic;
-            font-size: 0.9rem;
+            color: #404040;
+            font-size: 0.8rem;
             text-align: center;
-            padding: 15px 0;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.04);
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
     <div class="countdown-container">
-        <h1 class="header-title">Countdown</h1>
+        <h1 class="header-title">M i l e s t o n e</h1>
         <div id="events-wrapper">
             </div>
     </div>

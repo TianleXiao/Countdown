@@ -1,23 +1,18 @@
-// 数据层：定义所有的倒计时事件
+// 数据层：精准配置你的重要考试节点 (使用 ISO 8601 标准格式)
 const events = [
-    { name: "日文N2报名", targetDate: "2025-08-26T00:00:00" },
-    { name: "日文N2检定", targetDate: "2025-12-01T00:00:00" },
-    { name: "日文N1检定", targetDate: "2026-12-01T00:00:00" },
-    { name: "托福考试", targetDate: "2026-07-07T00:00:00" },
-    { name: "EJU", targetDate: "2027-06-01T00:00:00" }
+    { name: "SA2 考试", targetDate: "2026-06-25T00:00:00" },
+    { name: "雅思考试", targetDate: "2026-08-01T00:00:00" }
 ];
 
 const wrapper = document.getElementById('events-wrapper');
 
-// 初始化：遍历数组，为每个事件生成基础的 HTML 结构
+// 初始化渲染静态结构
 events.forEach((event, index) => {
     const eventDiv = document.createElement('div');
     eventDiv.className = 'event-item';
     
-    // 提取日期部分用于静态显示 (如 2025-08-26)
-    const displayDate = event.targetDate.split('T')[0];
+    const displayDate = event.targetDate.split('T')[0].replace(/-/g, ' . ');
 
-    // 注入基础结构，预留动态更新的容器 id
     eventDiv.innerHTML = `
         <div class="event-header">
             <span class="event-name">${event.name}</span>
@@ -29,7 +24,7 @@ events.forEach((event, index) => {
     wrapper.appendChild(eventDiv);
 });
 
-// 核心引擎：计算并更新剩余时间
+// 核心倒计时驱动引擎
 function updateTimers() {
     const now = new Date().getTime();
 
@@ -38,48 +33,56 @@ function updateTimers() {
         const timeRemaining = targetTime - now;
         const timerContainer = document.getElementById(`timer-${index}`);
 
-        // 状态拦截：如果时间已经过了，显示已结束状态
+        // 状态拦截：已结束的处理
         if (timeRemaining <= 0) {
-            timerContainer.innerHTML = '<div class="completed">已结束 / Event Concluded</div>';
-            timerContainer.style.display = 'block'; 
+            if (timerContainer.innerHTML !== '<div class="completed">Concluded</div>') {
+                timerContainer.innerHTML = '<div class="completed">Concluded</div>';
+                timerContainer.style.display = 'block';
+            }
             return;
         }
 
-        // 数学计算：毫秒转换
+        // 精确换算时间
         const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
         const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
 
-        // 格式化对齐：补全前导零
-        const formattedHours = hours.toString().padStart(2, '0');
-        const formattedMinutes = minutes.toString().padStart(2, '0');
-        const formattedSeconds = seconds.toString().padStart(2, '0');
+        // 补零对齐逻辑
+        const fDays = days.toString().padStart(2, '0');
+        const fHours = hours.toString().padStart(2, '0');
+        const fMinutes = minutes.toString().padStart(2, '0');
+        const fSeconds = seconds.toString().padStart(2, '0');
 
-        // 视图更新
-        timerContainer.innerHTML = `
+        // 生成新的 HTML 内容
+        const nextHTML = `
             <div class="time-box">
-                <div class="time-value">${days}</div>
+                <div class="time-value">${fDays}</div>
                 <div class="time-label">Days</div>
             </div>
             <div class="time-box">
-                <div class="time-value">${formattedHours}</div>
-                <div class="time-label">Hours</div>
+                <div class="time-value">${fHours}</div>
+                <div class="time-label">Hrs</div>
             </div>
             <div class="time-box">
-                <div class="time-value">${formattedMinutes}</div>
-                <div class="time-label">Mins</div>
+                <div class="time-value">${fMinutes}</div>
+                <div class="time-label">Min</div>
             </div>
             <div class="time-box">
-                <div class="time-value">${formattedSeconds}</div>
-                <div class="time-label">Secs</div>
+                <div class="time-value">${fSeconds}</div>
+                <div class="time-label">Sec</div>
             </div>
         `;
+
+        // 仅在数据真实变动时更新 DOM，减少重绘，保持极致的丝滑感
+        if (timerContainer.innerHTML !== nextHTML) {
+            timerContainer.innerHTML = nextHTML;
+        }
     });
 }
 
-// 首次执行，避免页面加载时出现内容空白闪烁
+// 立即执行一次防止白幕
 updateTimers();
 
-// 启动循环：每 1000 毫秒（1秒）刷新一次
+// 开启每秒刷新
 setInterval(updateTimers, 1000);
